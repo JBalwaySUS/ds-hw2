@@ -1,0 +1,16 @@
+01_tiny_sample  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+02_single_record  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+03_one_station  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+04_K_gt_stations  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+05_all_extreme  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+06_interval_tie  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+07_hotcold_tie  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+08_small_1k  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+09_medium_10k  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+10_large_100k  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+11_many_stations  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+12_single_station_gen  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+13_odd_sizes  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+------------------------------------------------------------
+TOTAL: 52 passed, 0 failed
+ALL TESTS PASSED

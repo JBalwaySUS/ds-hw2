@@ -1,0 +1,12 @@
+MPI  P=1 N=100000 K=10 S=1000  time=0.007934 s  scatter=0.000479 compute=0.003075 combine=0.004381
+MPI  P=2 N=100000 K=10 S=1000  time=0.009098 s  scatter=0.000982 compute=0.002123 combine=0.005993
+MPI  P=4 N=100000 K=10 S=1000  time=0.018829 s  scatter=0.003780 compute=0.002391 combine=0.012657
+MPI  P=8 N=100000 K=10 S=1000  time=0.026428 s  scatter=0.006471 compute=0.001834 combine=0.018123
+MPI  P=1 N=1000000 K=10 S=1000  time=0.114311 s  scatter=0.007206 compute=0.050044 combine=0.057061
+MPI  P=2 N=1000000 K=10 S=1000  time=0.115914 s  scatter=0.010004 compute=0.030963 combine=0.074947
+MPI  P=4 N=1000000 K=10 S=1000  time=0.190657 s  scatter=0.013370 compute=0.030968 combine=0.146319
+MPI  P=8 N=1000000 K=10 S=1000  time=0.364176 s  scatter=0.041942 compute=0.023421 combine=0.298813
+MPI  P=1 N=5000000 K=10 S=1000  time=1.037597 s  scatter=0.036745 compute=0.520616 combine=0.480236
+MPI  P=2 N=5000000 K=10 S=1000  time=0.967898 s  scatter=0.050670 compute=0.300708 combine=0.616520
+MPI  P=4 N=5000000 K=10 S=1000  time=1.284485 s  scatter=0.062562 compute=0.243316 combine=0.978607
+MPI  P=8 N=5000000 K=10 S=1000  time=2.694831 s  scatter=0.123588 compute=0.341935 combine=2.229307
