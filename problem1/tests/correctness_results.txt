@@ -1,0 +1,19 @@
+01_pdf_example1  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+02_pdf_example2  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+03_one_by_one  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+04_identity  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+05_zeros  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+06_even_split_8x4x5  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+07_uneven_split_7x5x4  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+08_single_row_1x6x5  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+09_n_equals_1_5x1x4  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+10_p_equals_1_5x4x1  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+11_tall_30x3x4  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+12_wide_3x30x4  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+13_fewer_rows_than_P_3x5x5  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+14_odd_dims_13x11x7  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+15_square_10x10x10  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+16_medium_100x80x60  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+------------------------------------------------------------
+TOTAL: 64 passed, 0 failed
+ALL TESTS PASSED

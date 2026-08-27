@@ -1,0 +1,59 @@
+================================================================
+ Q1  Row-Row Matrix Multiplication  —  Benchmark Results
+================================================================
+
+Environment : RCE SLURM cluster, 'debug' partition, single node,
+              OpenMPI (HPC-X 2.7.0), compiled: mpicxx -O2 -std=c++17
+Matrices    : square (m = n = p), generated with fixed seed 42 (--gen)
+Processes   : P = 1, 2, 4, 8      launched with mpirun --oversubscribe
+Timing      : MPI_Wtime over scatter(A) + local multiply + gather(C)
+
+Legend
+  P        number of MPI processes
+  Size     matrix dimension (m = n = p); result C is Size x Size
+  Time(s)  wall-clock seconds for the parallel phase (lower = faster)
+  S(P)     speed-up   = T(1) / T(P)      ideal = P, higher is better
+  E(P)     efficiency = S(P) / P         1.00 = perfect scaling
+
+  Each ROW is one matrix size; each COLUMN is one process count P.
+
+----------------------------------------------------------------
+RUNTIME   Time(s)   [wall-clock seconds, lower is better]
+----------------------------------------------------------------
+  Size  |    P=1    |    P=2    |    P=4    |    P=8
+--------+-----------+-----------+-----------+-----------
+   256  |  0.009423 |  0.005062 |  0.005759 |  0.007828
+   512  |  0.072875 |  0.037404 |  0.038406 |  0.044195
+  1024  |  0.572687 |  0.289763 |  0.291764 |  0.329676
+
+----------------------------------------------------------------
+SPEED-UP   S(P) = T(1)/T(P)   [ideal = P]
+----------------------------------------------------------------
+  Size  |  P=1  |  P=2  |  P=4  |  P=8
+--------+-------+-------+-------+-------
+   256  |  1.00 |  1.86 |  1.64 |  1.20
+   512  |  1.00 |  1.95 |  1.90 |  1.65
+  1024  |  1.00 |  1.98 |  1.96 |  1.74
+
+----------------------------------------------------------------
+EFFICIENCY   E(P) = S(P)/P   [1.00 = perfect]
+----------------------------------------------------------------
+  Size  |  P=1  |  P=2  |  P=4  |  P=8
+--------+-------+-------+-------+-------
+   256  |  1.00 |  0.93 |  0.41 |  0.15
+   512  |  1.00 |  0.97 |  0.47 |  0.21
+  1024  |  1.00 |  0.99 |  0.49 |  0.22
+
+----------------------------------------------------------------
+Reading the numbers
+----------------------------------------------------------------
+  * Near-ideal speed-up up to P=2 (E ~ 0.99 at Size=1024): both
+    cores are used and overhead is tiny.
+  * Plateau after P=2: the debug node exposed ~2 usable cores, so
+    P=4 and P=8 time-share the same cores and add MPI overhead
+    without extra compute -> S stops rising, E falls.
+  * Efficiency rises with matrix size (0.93 -> 0.97 -> 0.99 at P=2):
+    the one broadcast of B and one gather of C are a smaller share
+    of runtime as the m*n*p computation grows. This is the
+    communication-vs-computation trade-off.
+================================================================
