@@ -11,10 +11,6 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=$USER@college.edu
 
-# Load necessary modules. HPC-X is the module that works multi-node on this
-# cluster (openmpi/4.1.5 has no working UCX and its TCP fallback picks the
-# wrong interface, so runs spanning nodes hang). IPM, the MPI profiler, ships
-# inside HPC-X at $HPCX_IPM_LIB and is enabled by LD_PRELOAD - nothing to build.
 module load hpcx-2.7.0/hpcx-ompi
 
 # Navigate to project directory
