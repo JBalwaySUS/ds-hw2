@@ -52,7 +52,6 @@ where:
 - MPI source code for the assigned algorithm.
 - Program must run correctly for  $P = 1, 2, 4, 8$  processes.
 - README with compilation and execution instructions.
-
 - Correctness verification against a sequential computation.
 - Execution times for  $P = 1, 2, 4, 8$  over varying input sizes.
 - Speedup/efficiency plots and a short analysis of communication versus computation.
