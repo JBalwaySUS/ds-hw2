@@ -50,7 +50,7 @@ IPM="-x LD_PRELOAD=$HPCX_IPM_LIB -x IPM_REPORT=full"
 # Generate test graphs
 echo ""
 echo "Generating test graphs..."
-python3 generate.py --suite -d data
+python3 gen_graph.py --suite -d data
 
 echo ""
 echo "Starting benchmark tests..."
