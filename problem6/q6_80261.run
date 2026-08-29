@@ -1,0 +1,619 @@
+==========================================
+SLURM_JOB_ID = 80261
+SLURM_NODELIST = node[01-03,06]
+SLURM_JOB_GPUS = 
+==========================================
+=========================================
+SLURM Job ID: 80261
+Allocated nodes: 4
+Total tasks: 8
+Node list: node[01-03,06]
+=========================================
+
+Compiling MPI program...
+Compiling sequential program (with -pg)...
+
+Generating test graphs...
+data/input_small.txt  V=5 E=3
+data/input_medium.txt  V=500 E=2500
+data/input_large.txt  V=5000 E=25000
+data/input_very_large.txt  V=100000 E=1000000
+
+Starting benchmark tests...
+
+=========================================
+Input: data/input_large.txt
+=========================================
+sequential V=5000 E=50000 time=0.0037s
+
+--- P=1 ---
+P=1 V=5000 E=50000 rounds=2 read+scatter=0.0010s compute=0.0004s (comm=0.0000s) output=0.0015s total=0.0028s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_large.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:11 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:11 2026   wallclock : 0.05
+# mpi_tasks : 1 on 1 nodes               %comm     : 0.03
+# mem [GB]  : 0.02                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.05         0.05         0.05         0.05 
+# MPI       :          0.00         0.00         0.00         0.00 
+# %wall     :
+#   MPI     :                       0.03         0.03         0.03 
+# #calls    :
+#   MPI     :            11           11           11           11
+# mem [GB]  :          0.02         0.02         0.02         0.02 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Scatterv                  0.00              2           0.02
+# MPI_Allreduce                 0.00              2           0.01
+# MPI_Reduce                    0.00              1           0.00
+# MPI_Barrier                   0.00              1           0.00
+# MPI_Init                      0.00              1           0.00
+# MPI_Finalize                  0.00              1           0.00
+# MPI_Comm_rank                 0.00              1           0.00
+# MPI_Comm_size                 0.00              1           0.00
+# MPI_Bcast                     0.00              1           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=2 ---
+P=2 V=5000 E=50000 rounds=2 read+scatter=0.0026s compute=0.0004s (comm=0.0001s) output=0.0020s total=0.0050s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_large.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:11 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:11 2026   wallclock : 0.05
+# mpi_tasks : 2 on 1 nodes               %comm     : 4.23
+# mem [GB]  : 0.05                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.09         0.05         0.05         0.05 
+# MPI       :          0.00         0.00         0.00         0.00 
+# %wall     :
+#   MPI     :                       4.28         3.04         5.52 
+# #calls    :
+#   MPI     :            22           11           11           11
+# mem [GB]  :          0.05         0.03         0.02         0.03 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Scatterv                  0.00              4           1.48
+# MPI_Barrier                   0.00              2           1.40
+# MPI_Bcast                     0.00              2           1.17
+# MPI_Allreduce                 0.00              4           0.17
+# MPI_Reduce                    0.00              2           0.01
+# MPI_Init                      0.00              2           0.00
+# MPI_Finalize                  0.00              2           0.00
+# MPI_Comm_rank                 0.00              2           0.00
+# MPI_Comm_size                 0.00              2           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=4 ---
+P=4 V=5000 E=50000 rounds=2 read+scatter=0.0140s compute=0.0075s (comm=0.0073s) output=0.0019s total=0.0234s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_large.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:12 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:12 2026   wallclock : 0.10
+# mpi_tasks : 4 on 2 nodes               %comm     : 15.30
+# mem [GB]  : 0.12                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.39         0.10         0.09         0.10 
+# MPI       :          0.06         0.01         0.01         0.02 
+# %wall     :
+#   MPI     :                      15.30         9.29        22.53 
+# #calls    :
+#   MPI     :            44           11           11           11
+# mem [GB]  :          0.12         0.03         0.03         0.03 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Allreduce                 0.03              8           8.49
+# MPI_Barrier                   0.02              4           6.27
+# MPI_Bcast                     0.00              4           0.28
+# MPI_Scatterv                  0.00              8           0.25
+# MPI_Reduce                    0.00              4           0.01
+# MPI_Comm_rank                 0.00              4           0.00
+# MPI_Comm_size                 0.00              4           0.00
+# MPI_Init                      0.00              4           0.00
+# MPI_Finalize                  0.00              4           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=8 ---
+P=8 V=5000 E=50000 rounds=2 read+scatter=0.0317s compute=0.0132s (comm=0.0130s) output=0.0020s total=0.0469s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_large.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:12 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:13 2026   wallclock : 0.12
+# mpi_tasks : 8 on 4 nodes               %comm     : 26.93
+# mem [GB]  : 0.23                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.94         0.12         0.11         0.12 
+# MPI       :          0.25         0.03         0.02         0.04 
+# %wall     :
+#   MPI     :                      26.87        19.92        38.13 
+# #calls    :
+#   MPI     :            88           11           11           11
+# mem [GB]  :          0.23         0.03         0.03         0.03 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Barrier                   0.15              8          15.54
+# MPI_Allreduce                 0.10             16          10.95
+# MPI_Bcast                     0.00              8           0.25
+# MPI_Scatterv                  0.00             16           0.18
+# MPI_Reduce                    0.00              8           0.02
+# MPI_Comm_size                 0.00              8           0.00
+# MPI_Init                      0.00              8           0.00
+# MPI_Finalize                  0.00              8           0.00
+# MPI_Comm_rank                 0.00              8           0.00
+#
+###################################################################
+Correctness: PASS
+
+=========================================
+Input: data/input_medium.txt
+=========================================
+sequential V=500 E=5000 time=0.0004s
+
+--- P=1 ---
+P=1 V=500 E=5000 rounds=2 read+scatter=0.0002s compute=0.0000s (comm=0.0000s) output=0.0008s total=0.0010s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_medium.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:14 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:14 2026   wallclock : 0.04
+# mpi_tasks : 1 on 1 nodes               %comm     : 0.02
+# mem [GB]  : 0.02                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.04         0.04         0.04         0.04 
+# MPI       :          0.00         0.00         0.00         0.00 
+# %wall     :
+#   MPI     :                       0.02         0.02         0.02 
+# #calls    :
+#   MPI     :            11           11           11           11
+# mem [GB]  :          0.02         0.02         0.02         0.02 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Reduce                    0.00              1           0.01
+# MPI_Scatterv                  0.00              2           0.00
+# MPI_Allreduce                 0.00              2           0.00
+# MPI_Barrier                   0.00              1           0.00
+# MPI_Comm_size                 0.00              1           0.00
+# MPI_Init                      0.00              1           0.00
+# MPI_Finalize                  0.00              1           0.00
+# MPI_Comm_rank                 0.00              1           0.00
+# MPI_Bcast                     0.00              1           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=2 ---
+P=2 V=500 E=5000 rounds=2 read+scatter=0.0003s compute=0.0001s (comm=0.0000s) output=0.0009s total=0.0012s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_medium.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:14 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:14 2026   wallclock : 0.04
+# mpi_tasks : 2 on 1 nodes               %comm     : 0.31
+# mem [GB]  : 0.04                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.09         0.04         0.04         0.04 
+# MPI       :          0.00         0.00         0.00         0.00 
+# %wall     :
+#   MPI     :                       0.31         0.16         0.47 
+# #calls    :
+#   MPI     :            22           11           11           11
+# mem [GB]  :          0.04         0.02         0.02         0.02 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Bcast                     0.00              2           0.17
+# MPI_Scatterv                  0.00              4           0.05
+# MPI_Allreduce                 0.00              4           0.05
+# MPI_Barrier                   0.00              2           0.03
+# MPI_Reduce                    0.00              2           0.02
+# MPI_Init                      0.00              2           0.00
+# MPI_Finalize                  0.00              2           0.00
+# MPI_Comm_rank                 0.00              2           0.00
+# MPI_Comm_size                 0.00              2           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=4 ---
+P=4 V=500 E=5000 rounds=2 read+scatter=0.0124s compute=0.0017s (comm=0.0017s) output=0.0009s total=0.0150s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_medium.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:14 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:14 2026   wallclock : 0.08
+# mpi_tasks : 4 on 2 nodes               %comm     : 10.71
+# mem [GB]  : 0.11                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.29         0.07         0.07         0.08 
+# MPI       :          0.03         0.01         0.00         0.01 
+# %wall     :
+#   MPI     :                      10.58         2.45        18.85 
+# #calls    :
+#   MPI     :            44           11           11           11
+# mem [GB]  :          0.11         0.03         0.02         0.03 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Barrier                   0.02              4           8.34
+# MPI_Allreduce                 0.01              8           2.23
+# MPI_Scatterv                  0.00              8           0.08
+# MPI_Bcast                     0.00              4           0.05
+# MPI_Reduce                    0.00              4           0.01
+# MPI_Comm_size                 0.00              4           0.00
+# MPI_Init                      0.00              4           0.00
+# MPI_Finalize                  0.00              4           0.00
+# MPI_Comm_rank                 0.00              4           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=8 ---
+P=8 V=500 E=5000 rounds=2 read+scatter=0.0151s compute=0.0005s (comm=0.0005s) output=0.0008s total=0.0165s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_medium.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:15 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:15 2026   wallclock : 0.08
+# mpi_tasks : 8 on 4 nodes               %comm     : 12.46
+# mem [GB]  : 0.23                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.65         0.08         0.08         0.08 
+# MPI       :          0.08         0.01         0.00         0.02 
+# %wall     :
+#   MPI     :                      12.44         1.08        19.15 
+# #calls    :
+#   MPI     :            88           11           11           11
+# mem [GB]  :          0.23         0.03         0.03         0.03 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Barrier                   0.07              8          11.11
+# MPI_Allreduce                 0.00             16           0.66
+# MPI_Scatterv                  0.00             16           0.39
+# MPI_Bcast                     0.00              8           0.27
+# MPI_Reduce                    0.00              8           0.02
+# MPI_Comm_rank                 0.00              8           0.00
+# MPI_Comm_size                 0.00              8           0.00
+# MPI_Init                      0.00              8           0.00
+# MPI_Finalize                  0.00              8           0.00
+#
+###################################################################
+Correctness: PASS
+
+=========================================
+Input: data/input_small.txt
+=========================================
+sequential V=5 E=6 time=0.0000s
+
+--- P=1 ---
+P=1 V=5 E=6 rounds=2 read+scatter=0.0001s compute=0.0000s (comm=0.0000s) output=0.0006s total=0.0007s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_small.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:16 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:16 2026   wallclock : 0.03
+# mpi_tasks : 1 on 1 nodes               %comm     : 0.02
+# mem [GB]  : 0.02                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.03         0.03         0.03         0.03 
+# MPI       :          0.00         0.00         0.00         0.00 
+# %wall     :
+#   MPI     :                       0.02         0.02         0.02 
+# #calls    :
+#   MPI     :            11           11           11           11
+# mem [GB]  :          0.02         0.02         0.02         0.02 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Reduce                    0.00              1           0.01
+# MPI_Scatterv                  0.00              2           0.00
+# MPI_Allreduce                 0.00              2           0.00
+# MPI_Init                      0.00              1           0.00
+# MPI_Finalize                  0.00              1           0.00
+# MPI_Comm_rank                 0.00              1           0.00
+# MPI_Comm_size                 0.00              1           0.00
+# MPI_Bcast                     0.00              1           0.00
+# MPI_Barrier                   0.00              1           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=2 ---
+P=2 V=5 E=6 rounds=2 read+scatter=0.0002s compute=0.0000s (comm=0.0000s) output=0.0006s total=0.0008s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_small.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:16 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:16 2026   wallclock : 0.04
+# mpi_tasks : 2 on 1 nodes               %comm     : 0.32
+# mem [GB]  : 0.04                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.09         0.04         0.04         0.04 
+# MPI       :          0.00         0.00         0.00         0.00 
+# %wall     :
+#   MPI     :                       0.32         0.25         0.39 
+# #calls    :
+#   MPI     :            22           11           11           11
+# mem [GB]  :          0.04         0.02         0.02         0.02 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Barrier                   0.00              2           0.15
+# MPI_Allreduce                 0.00              4           0.08
+# MPI_Bcast                     0.00              2           0.07
+# MPI_Reduce                    0.00              2           0.01
+# MPI_Scatterv                  0.00              4           0.01
+# MPI_Comm_size                 0.00              2           0.00
+# MPI_Init                      0.00              2           0.00
+# MPI_Finalize                  0.00              2           0.00
+# MPI_Comm_rank                 0.00              2           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=4 ---
+P=4 V=5 E=6 rounds=2 read+scatter=0.0116s compute=0.0002s (comm=0.0002s) output=0.0007s total=0.0126s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_small.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:17 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:17 2026   wallclock : 0.07
+# mpi_tasks : 4 on 2 nodes               %comm     : 8.32
+# mem [GB]  : 0.12                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.29         0.07         0.07         0.07 
+# MPI       :          0.02         0.01         0.00         0.01 
+# %wall     :
+#   MPI     :                       8.21         0.44        16.10 
+# #calls    :
+#   MPI     :            44           11           11           11
+# mem [GB]  :          0.12         0.03         0.03         0.03 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Barrier                   0.02              4           7.22
+# MPI_Bcast                     0.00              4           0.81
+# MPI_Allreduce                 0.00              8           0.24
+# MPI_Scatterv                  0.00              8           0.02
+# MPI_Reduce                    0.00              4           0.01
+# MPI_Comm_size                 0.00              4           0.00
+# MPI_Init                      0.00              4           0.00
+# MPI_Finalize                  0.00              4           0.00
+# MPI_Comm_rank                 0.00              4           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=8 ---
+P=8 V=5 E=6 rounds=2 read+scatter=0.0110s compute=0.0009s (comm=0.0009s) output=0.0007s total=0.0125s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_small.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:17 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:17 2026   wallclock : 0.08
+# mpi_tasks : 8 on 4 nodes               %comm     : 7.40
+# mem [GB]  : 0.23                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.65         0.08         0.08         0.08 
+# MPI       :          0.05         0.01         0.00         0.01 
+# %wall     :
+#   MPI     :                       7.42         1.35        14.18 
+# #calls    :
+#   MPI     :            88           11           11           11
+# mem [GB]  :          0.23         0.03         0.03         0.03 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Barrier                   0.04              8           6.36
+# MPI_Allreduce                 0.01             16           0.91
+# MPI_Bcast                     0.00              8           0.09
+# MPI_Reduce                    0.00              8           0.03
+# MPI_Scatterv                  0.00             16           0.01
+# MPI_Init                      0.00              8           0.00
+# MPI_Finalize                  0.00              8           0.00
+# MPI_Comm_rank                 0.00              8           0.00
+# MPI_Comm_size                 0.00              8           0.00
+#
+###################################################################
+Correctness: PASS
+
+=========================================
+Input: data/input_very_large.txt
+=========================================
+sequential V=100000 E=2000000 time=0.1470s
+
+--- P=1 ---
+P=1 V=100000 E=2000000 rounds=2 read+scatter=0.0264s compute=0.0117s (comm=0.0000s) output=0.0180s total=0.0560s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_very_large.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:19 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:19 2026   wallclock : 0.10
+# mpi_tasks : 1 on 1 nodes               %comm     : 0.77
+# mem [GB]  : 0.05                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.10         0.10         0.10         0.10 
+# MPI       :          0.00         0.00         0.00         0.00 
+# %wall     :
+#   MPI     :                       0.77         0.77         0.77 
+# #calls    :
+#   MPI     :            11           11           11           11
+# mem [GB]  :          0.05         0.05         0.05         0.05 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Scatterv                  0.00              2           0.72
+# MPI_Allreduce                 0.00              2           0.04
+# MPI_Reduce                    0.00              1           0.00
+# MPI_Comm_size                 0.00              1           0.00
+# MPI_Barrier                   0.00              1           0.00
+# MPI_Bcast                     0.00              1           0.00
+# MPI_Init                      0.00              1           0.00
+# MPI_Finalize                  0.00              1           0.00
+# MPI_Comm_rank                 0.00              1           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=2 ---
+P=2 V=100000 E=2000000 rounds=2 read+scatter=0.0362s compute=0.0132s (comm=0.0008s) output=0.0257s total=0.0750s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_very_large.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:19 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:19 2026   wallclock : 0.12
+# mpi_tasks : 2 on 1 nodes               %comm     : 18.27
+# mem [GB]  : 0.07                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.21         0.10         0.09         0.12 
+# MPI       :          0.04         0.02         0.00         0.03 
+# %wall     :
+#   MPI     :                      20.57         3.04        38.10 
+# #calls    :
+#   MPI     :            22           11           11           11
+# mem [GB]  :          0.07         0.04         0.03         0.04 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Bcast                     0.03              2          15.31
+# MPI_Scatterv                  0.00              4           1.46
+# MPI_Allreduce                 0.00              4           0.75
+# MPI_Reduce                    0.00              2           0.63
+# MPI_Barrier                   0.00              2           0.11
+# MPI_Comm_rank                 0.00              2           0.00
+# MPI_Comm_size                 0.00              2           0.00
+# MPI_Init                      0.00              2           0.00
+# MPI_Finalize                  0.00              2           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=4 ---
+P=4 V=100000 E=2000000 rounds=2 read+scatter=0.0730s compute=0.0222s (comm=0.0145s) output=0.0260s total=0.1211s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_very_large.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:19 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:20 2026   wallclock : 0.18
+# mpi_tasks : 4 on 2 nodes               %comm     : 45.80
+# mem [GB]  : 0.14                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          0.65         0.16         0.15         0.18 
+# MPI       :          0.30         0.07         0.05         0.09 
+# %wall     :
+#   MPI     :                      46.56        28.65        55.02 
+# #calls    :
+#   MPI     :            44           11           11           11
+# mem [GB]  :          0.14         0.03         0.03         0.04 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Scatterv                  0.09              8          14.29
+# MPI_Bcast                     0.09              4          13.76
+# MPI_Barrier                   0.06              4           9.16
+# MPI_Allreduce                 0.06              8           8.58
+# MPI_Reduce                    0.00              4           0.01
+# MPI_Init                      0.00              4           0.00
+# MPI_Finalize                  0.00              4           0.00
+# MPI_Comm_rank                 0.00              4           0.00
+# MPI_Comm_size                 0.00              4           0.00
+#
+###################################################################
+Correctness: PASS
+
+--- P=8 ---
+P=8 V=100000 E=2000000 rounds=2 read+scatter=0.0863s compute=0.0204s (comm=0.0152s) output=0.0264s total=0.1331s
+##IPMv2.0.6########################################################
+#
+# command   : ./cc_mpi data/input_very_large.txt mpi_out.txt 
+# start     : Sat Aug 29 18:55:20 2026   host      : node01.local    
+# stop      : Sat Aug 29 18:55:20 2026   wallclock : 0.20
+# mpi_tasks : 8 on 4 nodes               %comm     : 47.35
+# mem [GB]  : 0.26                       gflop/sec : 0.00
+#
+#           :       [total]        <avg>          min          max
+# wallclock :          1.44         0.18         0.17         0.20 
+# MPI       :          0.68         0.09         0.07         0.10 
+# %wall     :
+#   MPI     :                      47.60        33.68        56.62 
+# #calls    :
+#   MPI     :            88           11           11           11
+# mem [GB]  :          0.26         0.03         0.02         0.05 
+#
+#                             [time]        [count]        <%wall>
+# MPI_Scatterv                  0.25             16          17.12
+# MPI_Barrier                   0.18              8          12.60
+# MPI_Bcast                     0.13              8           9.29
+# MPI_Allreduce                 0.12             16           8.33
+# MPI_Reduce                    0.00              8           0.01
+# MPI_Comm_rank                 0.00              8           0.00
+# MPI_Comm_size                 0.00              8           0.00
+# MPI_Init                      0.00              8           0.00
+# MPI_Finalize                  0.00              8           0.00
+#
+###################################################################
+Correctness: PASS
+
+=========================================
+gprof profile of sequential program
+=========================================
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+ no time accumulated
+
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  Ts/call  Ts/call  name    
+  0.00      0.00     0.00        1     0.00     0.00  _GLOBAL__sub_I_main
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+
+=========================================
+Benchmark completed!
+Results saved in: q6_80261.log
+=========================================
