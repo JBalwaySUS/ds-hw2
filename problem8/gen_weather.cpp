@@ -15,7 +15,10 @@
 //   rainfall    : [0.0, 50.0]
 //   wind_speed  : [0.0, 150.0]
 // Deterministic: same (N,K,S,seed) always yields the same file (mt19937).
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <random>
 using namespace std;
 
 int main(int argc, char** argv) {

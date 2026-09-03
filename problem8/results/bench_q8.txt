@@ -1,0 +1,15 @@
+SEQ  N=100000 K=10 S=1000  time=0.001263 s  parse=0.084225 analytics=0.001263
+MPI  P=1 N=100000 K=10 S=1000  time=0.002060 s  scatter=0.000479 compute=0.001244 combine=0.000337 parse=0.086232
+MPI  P=2 N=100000 K=10 S=1000  time=0.003241 s  scatter=0.000793 compute=0.000887 combine=0.001561 parse=0.086492
+MPI  P=4 N=100000 K=10 S=1000  time=0.005262 s  scatter=0.003313 compute=0.000646 combine=0.001304 parse=0.086673
+MPI  P=8 N=100000 K=10 S=1000  time=0.007824 s  scatter=0.005320 compute=0.000518 combine=0.001986 parse=0.088456
+SEQ  N=1000000 K=10 S=1000  time=0.015673 s  parse=0.844191 analytics=0.015673
+MPI  P=1 N=1000000 K=10 S=1000  time=0.026538 s  scatter=0.007153 compute=0.016222 combine=0.003163 parse=0.863735
+MPI  P=2 N=1000000 K=10 S=1000  time=0.025161 s  scatter=0.007915 compute=0.010874 combine=0.006372 parse=0.861955
+MPI  P=4 N=1000000 K=10 S=1000  time=0.030416 s  scatter=0.010497 compute=0.008416 combine=0.011503 parse=0.866635
+MPI  P=8 N=1000000 K=10 S=1000  time=0.033798 s  scatter=0.011208 compute=0.008249 combine=0.014340 parse=0.888833
+SEQ  N=5000000 K=10 S=1000  time=0.098599 s  parse=4.218570 analytics=0.098599
+MPI  P=1 N=5000000 K=10 S=1000  time=0.147561 s  scatter=0.036195 compute=0.097694 combine=0.013673 parse=4.335754
+MPI  P=2 N=5000000 K=10 S=1000  time=0.144087 s  scatter=0.039441 compute=0.082471 combine=0.022175 parse=4.307368
+MPI  P=4 N=5000000 K=10 S=1000  time=0.149491 s  scatter=0.042763 compute=0.058734 combine=0.047993 parse=4.309083
+MPI  P=8 N=5000000 K=10 S=1000  time=0.149387 s  scatter=0.045175 compute=0.042279 combine=0.061933 parse=4.434137

@@ -1,0 +1,19 @@
+==========================================
+SLURM_JOB_ID = 83608
+SLURM_NODELIST = node07
+SLURM_JOB_GPUS = 
+==========================================
+Job 83608 on node07
+nproc               : 16
+SLURM_CPUS_ON_NODE  : 16
+SLURM_CPUS_PER_TASK : 2
+
+P=1  m=1024 n=1024 p=1024  time=0.577713 s  bcastB=0.000000 scatterA=0.000453 compute=0.576285 gatherC=0.000975
+P=2  m=1024 n=1024 p=1024  time=0.293807 s  bcastB=0.001216 scatterA=0.000590 compute=0.290651 gatherC=0.001403
+P=4  m=1024 n=1024 p=1024  time=0.160368 s  bcastB=0.003520 scatterA=0.000835 compute=0.154812 gatherC=0.004579
+P=8  m=1024 n=1024 p=1024  time=0.096768 s  bcastB=0.007592 scatterA=0.001248 compute=0.086313 gatherC=0.003906
+P=1  m=1023 n=512 p=2048  time=0.581863 s  bcastB=0.000000 scatterA=0.000287 compute=0.579430 gatherC=0.002145
+P=2  m=1023 n=512 p=2048  time=0.296958 s  bcastB=0.001297 scatterA=0.000331 compute=0.292754 gatherC=0.002936
+P=4  m=1023 n=512 p=2048  time=0.159026 s  bcastB=0.003627 scatterA=0.000504 compute=0.150917 gatherC=0.004616
+P=8  m=1023 n=512 p=2048  time=0.097135 s  bcastB=0.007510 scatterA=0.000858 compute=0.085180 gatherC=0.005164
+Done.

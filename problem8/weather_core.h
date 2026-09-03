@@ -1,7 +1,17 @@
 #ifndef WEATHER_CORE_H
 #define WEATHER_CORE_H
 
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <climits>
+#include <cmath>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
 // One weather measurement. POD so it can be sent as raw bytes over MPI.
 struct Rec {
@@ -35,6 +45,80 @@ inline bool is_colder(const Meas& a, const Meas& b) {
     return a.sid < b.sid;
 }
 
+// Safety valve for the dense interval histogram (see IntervalHist below).
+// 200M buckets = 1.6 GB; anything beyond that is a pathological timestamp range.
+static const long long IVL_MAX_BUCKETS = 200000000LL;
+
+// Dense histogram of 60-second interval ids.
+//
+// Earlier revisions used unordered_map<interval_id,count>. That is O(1) in
+// theory but disastrous here: the number of DISTINCT intervals grows with N
+// (~N/4 for the supplied generator), so every rank ended up hashing one entry
+// per record and then shipping the whole map to rank 0 to be merged serially.
+// A dense array indexed by (iv - base) is ~30x faster to build, and — more
+// importantly — it is a plain contiguous buffer, so combining partial results
+// becomes a single MPI_Reduce(MPI_SUM) instead of a gather-and-hash-merge.
+struct IntervalHist {
+    long long base = 0;               // interval id of element 0
+    std::vector<long long> c;         // c[i] = count for interval (base + i)
+
+    bool empty() const { return c.empty(); }
+    long long lo() const { return base; }                        // inclusive
+    long long hi() const { return base + (long long)c.size(); }  // exclusive
+
+    // Grow geometrically so a scattered arrival order stays amortised O(1)/record.
+    void ensure(long long iv) {
+        if (c.empty()) { base = iv; c.assign(1, 0); return; }
+        if (iv < base) {
+            long long need = base - iv;
+            long long grow = std::max(need, (long long)c.size());
+            if ((long long)c.size() + grow > IVL_MAX_BUCKETS) {
+                std::fprintf(stderr, "Interval range too large (>%lld buckets).\n", IVL_MAX_BUCKETS);
+                std::exit(3);
+            }
+            c.insert(c.begin(), (size_t)grow, 0);
+            base -= grow;
+        }
+        if (iv - base >= (long long)c.size()) {
+            long long need = iv - base + 1;
+            long long grow = std::max(need, (long long)c.size() * 2);
+            if (grow > IVL_MAX_BUCKETS) {
+                std::fprintf(stderr, "Interval range too large (>%lld buckets).\n", IVL_MAX_BUCKETS);
+                std::exit(3);
+            }
+            c.resize((size_t)grow, 0);
+        }
+    }
+    void bump(long long iv) { ensure(iv); c[(size_t)(iv - base)]++; }
+
+    // Re-index onto [nbase, nbase+nsize) so two histograms can be added
+    // elementwise — and so every MPI rank can agree on one common layout.
+    void rebase(long long nbase, long long nsize) {
+        std::vector<long long> n((size_t)nsize, 0);
+        for (size_t i = 0; i < c.size(); ++i) {
+            long long iv = base + (long long)i;
+            if (iv >= nbase && iv < nbase + nsize) n[(size_t)(iv - nbase)] += c[i];
+        }
+        base = nbase; c.swap(n);
+    }
+
+    void merge(const IntervalHist& o) {
+        if (o.empty()) return;
+        if (empty()) { *this = o; return; }
+        long long nb = std::min(lo(), o.lo()), ne = std::max(hi(), o.hi());
+        if (nb != lo() || ne != hi()) rebase(nb, ne - nb);
+        for (size_t i = 0; i < o.c.size(); ++i) c[(size_t)(o.base + (long long)i - base)] += o.c[i];
+    }
+
+    // Busiest interval: max count; ties -> smaller interval id. Scanning
+    // ascending with a strict '>' keeps the smallest id on a tie.
+    void busiest(long long& iv, long long& cnt) const {
+        iv = 0; cnt = 0;
+        for (size_t i = 0; i < c.size(); ++i)
+            if (c[i] > cnt) { cnt = c[i]; iv = base + (long long)i; }
+    }
+};
+
 struct Stats {
     long long total = 0;
 
@@ -53,7 +137,7 @@ struct Stats {
     std::vector<double>    st_sumtemp;   // per-station temperature sum
     std::vector<double>    st_sumrain;   // per-station rainfall sum
 
-    std::unordered_map<long long,long long> ivl;  // interval_id -> count
+    IntervalHist ivl;                    // 60-second interval histogram
 
     void init(int S_) {
         S = S_;
@@ -76,7 +160,7 @@ struct Stats {
             st_sumtemp[r.sid] += r.temp;
             st_sumrain[r.sid] += r.rain;
         }
-        ivl[r.ts / 60]++;
+        ivl.bump(r.ts / 60);
 
         Meas m{r.temp, r.ts, r.sid, true};
         if (is_hotter(m, hot)) hot = m;
@@ -95,12 +179,12 @@ inline void merge_into(Stats& dst, const Stats& src) {
     dst.extreme  += src.extreme;
 
     if (dst.S == 0 && src.S > 0) dst.init(src.S);
-    for (int i = 0; i < src.S; ++i) {
+    for (int i = 0; i < src.S && i < dst.S; ++i) {
         dst.st_count[i]   += src.st_count[i];
         dst.st_sumtemp[i] += src.st_sumtemp[i];
         dst.st_sumrain[i] += src.st_sumrain[i];
     }
-    for (const auto& kv : src.ivl) dst.ivl[kv.first] += kv.second;
+    dst.ivl.merge(src.ivl);
 
     if (is_hotter(src.hot, dst.hot)) dst.hot = src.hot;
     if (is_colder(src.cold, dst.cold)) dst.cold = src.cold;
@@ -124,7 +208,7 @@ inline std::string format_results(const Stats& s, int K) {
     add_kv("AVERAGE_PRESSURE",    fmt6(any ? s.sum_pres / s.total : 0.0));
     add_kv("MIN_PRESSURE",        fmt6(any ? s.min_pres : 0.0));
     add_kv("MAX_PRESSURE",        fmt6(any ? s.max_pres : 0.0));
-    add_kv("TOTAL_RAINFALL",      fmt6(s.sum_rain > -INFINITY ? s.sum_rain : 0.0));
+    add_kv("TOTAL_RAINFALL",      fmt6(s.sum_rain));
     add_kv("MAX_RAINFALL",        fmt6(any ? s.max_rain : 0.0));
     add_kv("AVERAGE_WIND_SPEED",  fmt6(any ? s.sum_wind / s.total : 0.0));
     add_kv("MAX_WIND_SPEED",      fmt6(any ? s.max_wind : 0.0));
@@ -137,13 +221,8 @@ inline std::string format_results(const Stats& s, int K) {
          std::to_string(s.cold.valid ? s.cold.sid : 0) + " " +
          std::to_string(s.cold.valid ? s.cold.ts : 0) + "\n";
 
-    // Busiest 60-second interval: max count, ties -> smaller interval id.
-    long long best_iv = 0, best_cnt = 0; bool first = true;
-    for (const auto& kv : s.ivl) {
-        if (first || kv.second > best_cnt || (kv.second == best_cnt && kv.first < best_iv)) {
-            best_iv = kv.first; best_cnt = kv.second; first = false;
-        }
-    }
+    long long best_iv, best_cnt;
+    s.ivl.busiest(best_iv, best_cnt);
     o += "BUSIEST_INTERVAL " + std::to_string(best_iv) + " " + std::to_string(best_cnt) + "\n";
 
     // Top-K stations: count desc, then station id asc. Only stations with count>0.

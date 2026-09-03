@@ -1,0 +1,4 @@
+# The root .gitignore excludes *.out (compiled binaries). These are SLURM job
+# logs — the raw evidence behind the benchmark tables in report.md — so keep them.
+!*.out
+!*.err

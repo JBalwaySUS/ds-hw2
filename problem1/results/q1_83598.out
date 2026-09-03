@@ -1,3 +1,45 @@
+==========================================
+SLURM_JOB_ID = 83598
+SLURM_NODELIST = node07
+SLURM_JOB_GPUS = 
+==========================================
+Job 83598 on node07 | tasks=8
+--- Node hardware ---
+nproc                 : 8
+SLURM_CPUS_ON_NODE    : 8
+SLURM_JOB_CPUS_PER_NODE: 8
+CPU(s):              48
+Thread(s) per core:  2
+Core(s) per socket:  12
+Socket(s):           2
+Model name:          Intel(R) Xeon(R) Gold 5317 CPU @ 3.00GHz
+
+--- Correctness (should all say PASS) ---
+P=1  PASS
+P=2  PASS
+P=4  PASS
+P=8  PASS
+--- Full test suite ---
+01_pdf_example1  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+02_pdf_example2  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+03_one_by_one  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+04_identity  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+05_zeros  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+06_even_split_8x4x5  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+07_uneven_split_7x5x4  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+08_single_row_1x6x5  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+09_n_equals_1_5x1x4  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+10_p_equals_1_5x4x1  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+11_tall_30x3x4  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+12_wide_3x30x4  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+13_fewer_rows_than_P_3x5x5  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+14_odd_dims_13x11x7  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+15_square_10x10x10  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+16_medium_100x80x60  P1:PASS  P2:PASS  P4:PASS  P8:PASS
+------------------------------------------------------------
+TOTAL: 64 passed, 0 failed
+ALL TESTS PASSED
+--- Timing (raw lines also land in results/bench.txt) ---
 P=1  m=256 n=256 p=256  time=0.009494 s  bcastB=0.000000 scatterA=0.000030 compute=0.009433 gatherC=0.000030
 P=2  m=256 n=256 p=256  time=0.005139 s  bcastB=0.000131 scatterA=0.000043 compute=0.004699 gatherC=0.000286
 P=4  m=256 n=256 p=256  time=0.003528 s  bcastB=0.000349 scatterA=0.000066 compute=0.002374 gatherC=0.000842
@@ -14,3 +56,5 @@ P=1  m=1023 n=512 p=2048  time=0.574840 s  bcastB=0.000000 scatterA=0.000266 com
 P=2  m=1023 n=512 p=2048  time=0.290470 s  bcastB=0.001261 scatterA=0.000315 compute=0.286602 gatherC=0.002695
 P=4  m=1023 n=512 p=2048  time=0.152538 s  bcastB=0.004094 scatterA=0.000573 compute=0.143511 gatherC=0.005012
 P=8  m=1023 n=512 p=2048  time=0.160441 s  bcastB=0.010121 scatterA=0.001306 compute=0.144608 gatherC=0.008118
+plotting skipped (matplotlib unavailable)
+Done.

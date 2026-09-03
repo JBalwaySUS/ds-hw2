@@ -92,3 +92,31 @@ handles `N` not divisible by `P`). Each rank computes a local statistics object
 over its chunk; the partials are gathered to rank 0 and merged with the same
 `merge_into` used everywhere, then rank 0 formats and prints. This makes the MPI
 result identical to the sequential one (verified: 52/52 across P=1,2,4,8).
+
+## Everything at once (cluster)
+```
+sbatch run_q8.sh        # from inside Q8/: compile, verify, benchmark, plot
+```
+Requests `--ntasks=8 --cpus-per-task=2` so every rank gets a full physical core
+(the node runs 2 SMT threads per core), launches with `mpirun --bind-to core`,
+times **both** the sequential and the MPI implementation at each size, reruns the
+13-case suite, and regenerates `results/bench_q8.txt`,
+`results/benchmark_results.txt` and the three plots.
+
+## Verifying without a cluster
+```
+g++ -O2 -std=c++17 -o weather_check weather_check.cpp
+cd tests && for f in *.in; do ../weather_check "$f"; done
+```
+`weather_check` splits a dataset exactly as `MPI_Scatterv` would, merges the
+partials, and asserts the result is byte-identical to a single sequential pass —
+i.e. that reduction order never changes the printed output.
+
+## Note on the interval histogram
+The busiest-interval statistic uses a dense array indexed by
+`interval_id - base`, not a hash map. The number of distinct 60-second buckets
+grows with `N` (~N/4 for the supplied generator), so a hash map made the combine
+phase carry O(P·N) bytes into a serial merge and the program actually got slower
+with more ranks. The dense array reduces with a single `MPI_Reduce(MPI_SUM)`.
+It refuses to allocate beyond 200M buckets, so a pathologically sparse timestamp
+range fails loudly instead of exhausting memory. See report.md §2.1 and §3.

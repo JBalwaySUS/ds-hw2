@@ -1,5 +1,12 @@
 #include <mpi.h>
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <random>
+#include <string>
+#include <vector>
 using namespace std;
 
 // Core kernel : localC(localRows x p) += localA(localRows x n) * B(n x p)
@@ -20,6 +27,15 @@ static void multiply_rows(const vector<int>& localA, const vector<int>& B,
     }
 }
 
+// MPI collective counts are 'int'. Fail loudly rather than silently wrapping.
+static void require_int_count(size_t v, const char* what, int rank) {
+    if (v > (size_t)INT_MAX) {
+        if (rank == 0)
+            fprintf(stderr, "Error: %s = %zu exceeds INT_MAX; MPI element counts are int.\n", what, v);
+        MPI_Abort(MPI_COMM_WORLD, 3);
+    }
+}
+
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
     int rank, size;
@@ -30,7 +46,7 @@ int main(int argc, char** argv) {
     vector<int> A;   // full A on master only (row-major m x n)
     vector<int> B;   // full B on EVERY rank (row-major n x p)
 
-    // argument parsing (every rank sees the same argv) 
+    // argument parsing (every rank sees the same argv)
     bool genMode = false, writeOut = false;
     string inPath, outPath;
     unsigned seed = 12345;
@@ -73,43 +89,60 @@ int main(int argc, char** argv) {
             B.resize((size_t)n * p);
             for (auto& x : A) fin >> x;
             for (auto& x : B) fin >> x;
+            if (!fin) { fprintf(stderr, "Malformed input %s: expected %d + %d integers\n",
+                                inPath.c_str(), m * n, n * p); MPI_Abort(MPI_COMM_WORLD, 2); }
         }
     }
 
-    //broadcast dimensions, then broadcast full B 
+    // Broadcast the three dimensions. This is 3 ints of metadata, not part of the
+    // data-movement phase, so it stays outside the timed region.
     MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&p, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    if (rank != 0) B.resize((size_t)n * p);
-    MPI_Bcast(B.data(), n * p, MPI_INT, 0, MPI_COMM_WORLD);
 
-    // row distribution (handles m NOT divisible by P) 
+    // row distribution (handles m NOT divisible by P)
     // First 'rem' processes get one extra row.
     vector<int> rows(size), sendA(size), dispA(size), recvC(size), dispC(size);
-    int base = m / size, rem = m % size, offA = 0, offC = 0;
+    int base = m / size, rem = m % size;
+    size_t offA = 0, offC = 0;
     for (int i = 0; i < size; ++i) {
-        rows[i]  = base + (i < rem ? 1 : 0);
+        rows[i] = base + (i < rem ? 1 : 0);
+        require_int_count((size_t)rows[i] * n, "rows*n", rank);
+        require_int_count((size_t)rows[i] * p, "rows*p", rank);
+        require_int_count(offA + (size_t)rows[i] * n, "A displacement", rank);
+        require_int_count(offC + (size_t)rows[i] * p, "C displacement", rank);
         sendA[i] = rows[i] * n;          // ints of A for rank i
         recvC[i] = rows[i] * p;          // long longs of C from rank i
-        dispA[i] = offA; offA += sendA[i];
-        dispC[i] = offC; offC += recvC[i];
+        dispA[i] = (int)offA; offA += (size_t)sendA[i];
+        dispC[i] = (int)offC; offC += (size_t)recvC[i];
     }
     int localRows = rows[rank];
+
+    // Buffer allocation is local work, so it is done before the clock starts.
+    require_int_count((size_t)n * p, "n*p", rank);
+    if (rank != 0) B.resize((size_t)n * p);
     vector<int>       localA((size_t)localRows * n);
     vector<long long> localC((size_t)localRows * p, 0);
+    vector<long long> C;
+    if (rank == 0) C.resize((size_t)m * p);
 
-    // timed region : scatter A -> compute -> gather C 
+    // timed region : broadcast B -> scatter A -> compute -> gather C
+    // The broadcast of B is genuine parallel-phase communication and is therefore
+    // measured, not excluded.
     MPI_Barrier(MPI_COMM_WORLD);
     double t0 = MPI_Wtime();
+
+    MPI_Bcast(B.data(), n * p, MPI_INT, 0, MPI_COMM_WORLD);
+    double tb = MPI_Wtime();
 
     MPI_Scatterv(rank == 0 ? A.data() : nullptr, sendA.data(), dispA.data(), MPI_INT,
                  localA.data(), localRows * n, MPI_INT,
                  0, MPI_COMM_WORLD);
+    double ts = MPI_Wtime();
 
     multiply_rows(localA, B, localC, localRows, n, p);
+    double tc = MPI_Wtime();
 
-    vector<long long> C;
-    if (rank == 0) C.resize((size_t)m * p);
     MPI_Gatherv(localC.data(), localRows * p, MPI_LONG_LONG,
                 rank == 0 ? C.data() : nullptr, recvC.data(), dispC.data(), MPI_LONG_LONG,
                 0, MPI_COMM_WORLD);
@@ -117,9 +150,17 @@ int main(int argc, char** argv) {
     MPI_Barrier(MPI_COMM_WORLD);
     double t1 = MPI_Wtime();
 
+    // Per-phase cost = slowest rank for that phase, so the breakdown reflects the
+    // critical path rather than rank 0's private view.
+    double mine[4] = { tb - t0, ts - tb, tc - ts, t1 - tc };
+    double worst[4];
+    MPI_Reduce(mine, worst, 4, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+
     // output
     if (rank == 0) {
-        fprintf(stderr, "P=%d  m=%d n=%d p=%d  time=%.6f s\n", size, m, n, p, t1 - t0);
+        fprintf(stderr, "P=%d  m=%d n=%d p=%d  time=%.6f s"
+                        "  bcastB=%.6f scatterA=%.6f compute=%.6f gatherC=%.6f\n",
+                size, m, n, p, t1 - t0, worst[0], worst[1], worst[2], worst[3]);
         if (!genMode) {
             string buf;
             buf.reserve((size_t)m * p * 4);

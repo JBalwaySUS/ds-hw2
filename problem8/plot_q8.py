@@ -1,46 +1,72 @@
 #!/usr/bin/env python3
-# plot_q8.py - build speedup, phase-breakdown, and communication-share plots
-# from the phase-timed benchmark log.
-#
-# Usage:
-#   grep 'time=' bench_q8.txt > /dev/null   # (bench_q8.txt is the raw log)
-#   python3 plot_q8.py bench_q8.txt
-#
-# Each line looks like:
-#   MPI  P=4 N=1000000 K=10 S=1000  time=0.190657 s  scatter=0.013370 compute=0.030968 combine=0.146319
-import re, sys, collections
+"""Build speed-up, compute-only, phase-breakdown and communication-share plots
+from the phase-timed benchmark log, plus a formatted results table.
+
+Usage:  python3 plot_q8.py results/bench_q8.txt
+
+The log carries two line shapes:
+  SEQ  N=1000000 K=10 S=1000  time=0.081234 s
+  MPI  P=4 N=1000000 K=10 S=1000  time=0.019065 s  scatter=0.0133 compute=0.0309 combine=0.0146
+"""
+import re, sys, os, collections
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 if len(sys.argv) < 2:
-    sys.exit("Usage: python3 plot_q8.py bench_q8.txt")
+    sys.exit("Usage: python3 plot_q8.py results/bench_q8.txt")
+logpath = sys.argv[1]
+outdir = os.path.dirname(os.path.abspath(logpath))
 
-pat = re.compile(r"P=(\d+)\s+N=(\d+).*?time=([0-9.]+).*?scatter=([0-9.]+)\s+compute=([0-9.]+)\s+combine=([0-9.]+)")
-# data[N][P] = (total, scatter, compute, combine)
-data = collections.defaultdict(dict)
-for line in open(sys.argv[1]):
-    m = pat.search(line)
-    if not m:
+mpi_pat = re.compile(r"MPI\s+P=(\d+)\s+N=(\d+).*?time=([0-9.]+).*?"
+                     r"scatter=([0-9.]+)\s+compute=([0-9.]+)\s+combine=([0-9.]+)"
+                     r"(?:\s+parse=([0-9.]+))?")
+seq_pat = re.compile(r"SEQ\s+N=(\d+).*?time=([0-9.]+)(?:.*?parse=([0-9.]+))?")
+
+data = collections.defaultdict(dict)   # data[N][P] = (total, scatter, compute, combine)
+seq  = {}                              # seq[N] = sequential ANALYTICS time
+parse = {}                             # parse[N] = serial text-parse time
+for line in open(logpath):
+    m = mpi_pat.search(line)
+    if m:
+        P, N, tot, sc, co, cb = m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6)
+        data[int(N)][int(P)] = (float(tot), float(sc), float(co), float(cb))
+        if m.group(7):
+            parse.setdefault(int(N), float(m.group(7)))
         continue
-    P, N, tot, sc, co, cb = m.groups()
-    data[int(N)][int(P)] = (float(tot), float(sc), float(co), float(cb))
+    m = seq_pat.search(line)
+    if m:
+        seq[int(m.group(1))] = float(m.group(2))
+        if m.group(3):
+            parse[int(m.group(1))] = float(m.group(3))
+if not data:
+    sys.exit(f"No MPI timing lines found in {logpath}")
 
 def label(n):
-    return {100000: "100k", 1000000: "1M", 5000000: "5M"}.get(n, str(n))
+    return f"{n//1000000}M" if n >= 1000000 else f"{n//1000}k"
 
-# 1) total-time speedup
+written = []
+def save(name):
+    p = os.path.join(outdir, name); plt.savefig(p, dpi=130, bbox_inches="tight")
+    written.append(p); return p
+
+Pmax = max(p for N in data for p in data[N])
+
+# 1) total-time speed-up, against MPI P=1 and (where available) against the
+#    sequential program — the honest baseline for "did parallelism help".
 plt.figure()
 for N in sorted(data):
     Ps = sorted(data[N]); t1 = data[N][1][0]
-    plt.plot(Ps, [t1 / data[N][p][0] for p in Ps], marker="o", label=f"N={label(N)}")
-Pmax = max(p for N in data for p in data[N])
-plt.plot(range(1, Pmax + 1), range(1, Pmax + 1), "k--", label="ideal")
-plt.xlabel("Processes P"); plt.ylabel("Speed-up S(P)=T1/TP")
-plt.title("Q8 total-time speed-up"); plt.legend(); plt.grid(True)
-plt.savefig("q8_speedup.png", dpi=130, bbox_inches="tight")
+    plt.plot(Ps, [t1 / data[N][p][0] for p in Ps], marker="o", label=f"N={label(N)}  (vs MPI P=1)")
+    if N in seq:
+        plt.plot(Ps, [seq[N] / data[N][p][0] for p in Ps], marker="^", ls="--",
+                 label=f"N={label(N)}  (vs sequential)")
+plt.plot(range(1, Pmax + 1), range(1, Pmax + 1), "k:", label="ideal")
+plt.xlabel("Processes P"); plt.ylabel("Speed-up")
+plt.title("Q8 total-time speed-up"); plt.legend(fontsize=8); plt.grid(True)
+save("q8_speedup.png")
 
-# 2) compute-only speedup (the parallelisable part)
+# 2) compute-only speed-up (the parallelisable part)
 plt.figure()
 for N in sorted(data):
     Ps = sorted(data[N]); c1 = data[N][1][2]
@@ -48,23 +74,71 @@ for N in sorted(data):
 plt.plot(range(1, Pmax + 1), range(1, Pmax + 1), "k--", label="ideal")
 plt.xlabel("Processes P"); plt.ylabel("Compute-only speed-up")
 plt.title("Q8 speed-up of the computation phase alone"); plt.legend(); plt.grid(True)
-plt.savefig("q8_compute_speedup.png", dpi=130, bbox_inches="tight")
+save("q8_compute_speedup.png")
 
-# 3) stacked phase breakdown for the largest dataset (5M)
-big = max(data)
-Ps = sorted(data[big])
-scat = [data[big][p][1] for p in Ps]
+# 3) stacked phase breakdown for the largest dataset
+big = max(data); Ps = sorted(data[big])
 comp = [data[big][p][2] for p in Ps]
+scat = [data[big][p][1] for p in Ps]
 comb = [data[big][p][3] for p in Ps]
 plt.figure()
 x = range(len(Ps))
 plt.bar(x, comp, label="compute")
 plt.bar(x, scat, bottom=comp, label="scatter (comm)")
 plt.bar(x, comb, bottom=[comp[i] + scat[i] for i in x], label="combine (comm)")
-plt.xticks(list(x), [f"P={p}" for p in Ps])
-plt.ylabel("Time (s)")
+for i, p in enumerate(Ps):
+    plt.text(i, data[big][p][0], f"{data[big][p][0]:.3f}s", ha="center", va="bottom", fontsize=8)
+plt.xticks(list(x), [f"P={p}" for p in Ps]); plt.ylabel("Time (s)")
 plt.title(f"Q8 phase breakdown (N={label(big)})")
-plt.legend(); plt.grid(True, axis="y")
-plt.savefig("q8_phase_breakdown.png", dpi=130, bbox_inches="tight")
+plt.legend(); plt.grid(True, axis="y"); plt.margins(y=0.12)
+save("q8_phase_breakdown.png")
 
-print("Wrote q8_speedup.png, q8_compute_speedup.png, q8_phase_breakdown.png")
+# 4) formatted table, so the report never needs hand-transcribed numbers
+Ns = sorted(data); Pall = sorted({p for N in data for p in data[N]})
+out = ["=" * 68, " Q8  Weather Analytics  -  Benchmark Results", "=" * 68, "",
+       f"Generated by plot_q8.py from {os.path.basename(logpath)}.",
+       "Timed region: scatter + compute + combine, barrier-separated (see report).", ""]
+def table(title, fmt, fn):
+    L = ["-" * 68, title, "-" * 68,
+         "  " + "N".ljust(10) + "|" + "|".join(f" P={p} ".center(11) for p in Pall),
+         "  " + "-" * 10 + "+" + "+".join("-" * 11 for _ in Pall)]
+    for N in Ns:
+        row = "  " + label(N).ljust(10) + "|"
+        for p in Pall:
+            row += (fmt.format(fn(N, p)) if p in data[N] else "n/a").center(11) + "|"
+        L.append(row.rstrip("|"))
+    return "\n".join(L) + "\n"
+out.append(table("TOTAL RUNTIME  seconds", "{:.6f}", lambda N, p: data[N][p][0]))
+out.append(table("SPEED-UP  S(P) = T(1)/T(P)", "{:.2f}", lambda N, p: data[N][1][0] / data[N][p][0]))
+out.append(table("EFFICIENCY  E(P) = S(P)/P", "{:.2f}", lambda N, p: (data[N][1][0] / data[N][p][0]) / p))
+out.append(table("COMPUTE-ONLY SPEED-UP", "{:.2f}", lambda N, p: data[N][1][2] / data[N][p][2]))
+out.append(table("COMMUNICATION SHARE  (scatter+combine)/total", "{:.1%}",
+                 lambda N, p: (data[N][p][1] + data[N][p][3]) / data[N][p][0]))
+if seq:
+    out += ["-" * 68,
+            "SEQUENTIAL BASELINE  (analytics only - like-for-like with the MPI",
+            "timed region, which also excludes the file parse)",
+            "-" * 68]
+    for N in Ns:
+        if N in seq:
+            best = min(data[N][p][0] for p in data[N])
+            out.append(f"  N={label(N):<6} seq analytics {seq[N]:.6f}s   best MPI {best:.6f}s   "
+                       f"speed-up {seq[N]/best:.2f}x")
+    out.append("")
+if parse:
+    out += ["-" * 68,
+            "SERIAL TEXT PARSE  (excluded from every timing above; shown because",
+            "it dominates the real end-to-end cost - see report section 9)",
+            "-" * 68]
+    for N in Ns:
+        if N in parse:
+            best = min(data[N][p][0] for p in data[N])
+            out.append(f"  N={label(N):<6} parse {parse[N]:.6f}s   "
+                       f"= {parse[N]/best:.0f}x the best analytics time")
+    out.append("")
+out.append("=" * 68)
+tbl = os.path.join(outdir, "benchmark_results.txt")
+open(tbl, "w").write("\n".join(out) + "\n")
+written.append(tbl)
+
+print("Wrote: " + ", ".join(written))

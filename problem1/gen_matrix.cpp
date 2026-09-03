@@ -1,4 +1,8 @@
-#include <bits/stdc++.h>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <random>
 using namespace std;
 int main(int argc, char** argv) {
     if (argc < 5) { fprintf(stderr, "Usage: %s m n p seed [outfile]\n", argv[0]); return 1; }
