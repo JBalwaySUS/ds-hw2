@@ -7,10 +7,10 @@ the MPI processes; the component ids are agreed on by message passing.
 ## Files
 - `cc_mpi.cpp`   — MPI implementation (the parallel program).
 - `cc_seq.cpp`   — sequential union-find implementation (correctness ground truth).
-- `generate.py`  — generates `input.txt` files of various sizes/shapes.
+- `gen_graph.py` — generates `input.txt` files, or the whole benchmark suite.
 - `submit_q6.sh` — SLURM script: compiles both programs with profiling enabled,
   generates the graphs, runs P = 1, 2, 4, 8 over every input size, verifies each
-  run against the sequential result, and dumps the mpiP/gprof reports into the log.
+  run against the sequential result, and dumps the IPM/gprof reports into the log.
 
 ## Algorithm
 Distributed label propagation accelerated by a local union-find.
@@ -51,11 +51,12 @@ mpicxx -O2 -std=c++17 -o cc_mpi cc_mpi.cpp
 g++    -O2 -std=c++17 -o cc_seq cc_seq.cpp
 ```
 
-With profiling enabled (mpiP ships with the openmpi module):
+With profiling enabled. IPM ships with the HPC-X module and is attached at run
+time via `LD_PRELOAD`, so the MPI program needs no extra link flags — only `-g`
+for symbol names. The sequential program is built with `-pg` for gprof:
 ```bash
-mpicxx -g -O2 -std=c++17 -o cc_mpi cc_mpi.cpp -lmpiP -lm -lbfd -liberty -lunwind -ldl
+mpicxx -g -O2 -std=c++17 -o cc_mpi cc_mpi.cpp
 g++    -g -O2 -pg -std=c++17 -o cc_seq cc_seq.cpp
-export MPIP="-t 5.0 -k 2"
 ```
 
 ## Run
@@ -68,25 +69,21 @@ diff out_seq.txt out.txt                                   # verify
 
 ## Generate inputs
 ```bash
-python3 generate.py 100000 1000000 --mode clusters -o input.txt
-python3 generate.py --suite -d data        # the whole benchmark suite
+python3 gen_graph.py 100000 1000000 -o input.txt   # one graph: V=100000, E=1000000
+python3 gen_graph.py --suite -d data               # the whole benchmark suite
 ```
-Modes: `random`, `clusters`, `chain` (large diameter — the hard case), `grid`,
-`empty`. `--seed` makes every graph reproducible (default 42).
+Edges are drawn uniformly at random without self-loops or duplicates.
+`--seed` makes every graph reproducible (default 42), and `--suite` gives each of
+its four sizes its own deterministic stream. The suite's small case is the exact
+sample input from `task.md`; the other three are `V/E` = 500/2500, 5000/25000 and
+100000/1000000, matching the rows of the timing table in `report.md`.
 
 ## Benchmark
 ```bash
 sbatch submit_q6.sh
 ```
-Everything — timings, PASS/FAIL per run, the mpiP report after each run and a
+Everything — timings, PASS/FAIL per run, the IPM report after each run and a
 `gprof` profile of the sequential program — goes into `q6_<jobid>.log`.
-
-## A note on the sizes
-At the assignment's stated maximum (`V = 10^5`, `E = 10^6`) the whole
-computation is only ~10 ms, so speed-up over `P` measures little except
-collective latency. The suite therefore also contains one deliberately
-over-spec case (`V = 4·10^5`, `E = 2·10^6`) so the scaling study has something
-real to measure. The in-spec sizes are all still there.
 
 ## Verification status
 - `cc_seq` reproduces the sample input/output in `task.md` exactly.
